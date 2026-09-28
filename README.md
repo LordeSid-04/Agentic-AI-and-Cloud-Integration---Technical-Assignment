@@ -10,10 +10,10 @@ An AI-powered command-line assistant that answers natural-language questions abo
 # 1. Install dependencies
 pip install -r requirements.txt
 
-# 2. Add your OpenAI API key
+# 2. Add your LLM API key
 cp .env.example .env
 # Edit .env and paste your key:
-# OPENAI_API_KEY=sk-...
+# LLM_API_KEY=your_api_key_here
 
 # 3. Run
 python main.py
@@ -31,7 +31,9 @@ This keeps a clean separation of concerns: the LLM handles language understandin
 
 ### LLM Choice
 
-We use OpenAI's `gpt-4o-mini`. It offers industry-standard function-calling fidelity, fast latency, and highly cost-effective execution. Calculations and data transformations are strictly decoupled from the LLM and executed deterministically in Python.
+We use a free-tier LLM provider (e.g., Google Gemini or Groq) via an OpenAI-compatible endpoint. This fulfills the requirement that no paid subscription is necessary while retaining industry-standard function-calling fidelity. Switching providers is a simple configuration change in `.env`.
+
+Calculations and data transformations are strictly decoupled from the LLM and executed deterministically in Python. The agent loop is deliberately built as a plain, native function-calling loop with no heavy frameworks (like LangChain or LangGraph), matching the brief's instruction to "keep the solution simple". The LLM resolves the dates, and Python validates every range.
 
 ### Tools
 
@@ -49,7 +51,7 @@ Both tools share the same date-validation and filtering logic. The date range us
 The brief emphasises not assuming or fabricating missing data. The assistant handles this in three ways:
 
 1. **Fully out-of-range requests** (e.g. September dates) are refused with a clear message stating the dataset only covers August 2026.
-2. **Partially overlapping ranges** (e.g. 28 August – 3 September) compute the total for the available days only and explicitly warn the user which days were excluded.
+2. **Partially overlapping ranges** (e.g. 28 August – 3 September) bill only the period with data. The generated file explicitly clips the billing period, adds a **Note** row explaining the exclusion, and the assistant warns the user in chat.
 3. **Reversed dates** and **unparseable input** are caught and surfaced as friendly error messages rather than stack traces.
 
 Off-topic queries (e.g. "What's the capital of France?") receive a polite refusal - the system prompt constrains the LLM to energy-related queries only.

@@ -23,6 +23,10 @@ def _build_system_prompt(min_date, max_date):
         "- If the user's request does not clearly map to either tool, "
         "ask a clarifying question instead of guessing.\n"
         "- Never perform energy calculations yourself - always use the tools.\n"
+        "- You do not know today's date. If the user uses relative dates such as "
+        "'yesterday' or 'last week', ask them for explicit dates instead of guessing.\n"
+        "- In every answer, state the exact date range you used (for example "
+        "'8 Aug 2026 to 14 Aug 2026').\n"
         "- Present the tool's results clearly to the user, including any "
         "warnings about partial data coverage.\n"
         "- If a tool returns an error, relay it in a helpful, friendly way.\n"
@@ -142,7 +146,7 @@ class EnergyAgent:
 
             # Process each tool call
             # Add the assistant message (with tool_calls) to history
-            self.history.append(message.model_dump())
+            self.history.append(message.model_dump(exclude_none=True))
 
             for tool_call in message.tool_calls:
                 fn_name = tool_call.function.name

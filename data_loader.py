@@ -7,9 +7,12 @@ def load_energy_data():
     df = pd.read_csv(DATA_PATH, parse_dates=["timestamp"])
 
     # Validation
-    assert not df["timestamp"].isna().any(), "Missing timestamps detected."
-    assert df["timestamp"].is_unique, "Duplicate timestamps detected."
-    assert (df["energy_consumption_kwh"] >= 0).all(), "Negative consumption values detected."
+    if df["timestamp"].isna().any():
+        raise ValueError("Missing timestamps detected.")
+    if not df["timestamp"].is_unique:
+        raise ValueError("Duplicate timestamps detected.")
+    if not (df["energy_consumption_kwh"] >= 0).all():
+        raise ValueError("Negative consumption values detected.")
 
     df = df.sort_values("timestamp").reset_index(drop=True)
 

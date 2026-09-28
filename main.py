@@ -1,23 +1,19 @@
 import sys
-import io
 from data_loader import load_energy_data
 from agent import EnergyAgent
-from config import OPENAI_API_KEY
+from config import LLM_API_KEY
 
 # Fix Windows console encoding - LLM responses may contain Unicode characters
 # that cp1252 cannot handle.
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
-sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 
 def main():
     # Pre-flight: API key check
-    if not OPENAI_API_KEY:
-        print("✗ OPENAI_API_KEY not found.")
-        print("  Add your OpenAI API key to the .env file in this directory:")
-        print("    OPENAI_API_KEY=sk-proj-...")
-        print()
-        print("  You can generate or find your key at https://platform.openai.com/api-keys")
+    if not LLM_API_KEY:
+        print("✗ LLM_API_KEY not found.")
+        print("  Copy .env.example to .env and paste your free API key.")
         sys.exit(1)
 
     # Load data
