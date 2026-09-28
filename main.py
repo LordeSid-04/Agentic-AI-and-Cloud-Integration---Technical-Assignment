@@ -4,7 +4,6 @@ from agent import EnergyAgent
 from config import LLM_API_KEY
 
 # Fix Windows console encoding - LLM responses may contain Unicode characters
-# that cp1252 cannot handle.
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
@@ -12,8 +11,8 @@ sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 def main():
     # Pre-flight: API key check
     if not LLM_API_KEY:
-        print("✗ LLM_API_KEY not found.")
-        print("  Copy .env.example to .env and paste your free API key.")
+        print("LLM_API_KEY not found.")
+        print("Copy .env.example to .env and paste your free API key.")
         sys.exit(1)
 
     # Load data
@@ -21,18 +20,18 @@ def main():
     try:
         df, min_date, max_date = load_energy_data()
     except Exception as e:
-        print(f"✗ Failed to load data: {e}")
+        print(f"Failed to load data: {e}")
         sys.exit(1)
 
-    print(f"✓ Loaded {len(df)} hourly readings")
-    print(f"  Coverage: {min_date.strftime('%d %b %Y')} – {max_date.strftime('%d %b %Y %H:%M')}")
+    print(f"Loaded {len(df)} hourly readings")
+    print(f"Coverage: {min_date.strftime('%d %b %Y')} – {max_date.strftime('%d %b %Y %H:%M')}")
     print()
 
     # Initialise agent
     agent = EnergyAgent(df, min_date, max_date)
 
     print("=" * 60)
-    print("  ⚡ Agentic AI Energy Assistant")
+    print("  Agentic AI Energy Assistant")
     print("  Ask about energy consumption or request an invoice.")
     print("  Type 'quit' or 'exit' to leave.")
     print("=" * 60)

@@ -149,6 +149,7 @@ def generate_invoice(df: pd.DataFrame, start_date: str, end_date: str) -> dict:
     result = {
         "message": "Invoice generated successfully.",
         "file_path": str(filepath.resolve()),
+        "file_name": filename,
         "billing_period": f"{period_start} to {period_end}",
         "total_kwh": total_kwh,
         "tariff_sgd_per_kwh": TARIFF_SGD_PER_KWH,

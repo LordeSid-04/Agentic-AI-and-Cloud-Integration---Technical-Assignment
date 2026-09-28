@@ -12,7 +12,8 @@ OUTPUT_DIR = BASE_DIR / "output"
 # Energy tariff
 TARIFF_SGD_PER_KWH = 0.25
 
-# LLM (any OpenAI-compatible provider; defaults to Gemini free tier)
+# LLM (any OpenAI-compatible provider; defaults to Groq free tier)
 LLM_API_KEY = os.getenv("LLM_API_KEY")
-LLM_BASE_URL = os.getenv("LLM_BASE_URL", "https://generativelanguage.googleapis.com/v1beta/openai/")
-MODEL_NAME = os.getenv("LLM_MODEL", "gemini-2.5-flash")
+LLM_BASE_URL = os.getenv("LLM_BASE_URL", "https://api.groq.com/openai/v1")
+MODEL_NAME = os.getenv("LLM_MODEL", "openai/gpt-oss-120b")
+
