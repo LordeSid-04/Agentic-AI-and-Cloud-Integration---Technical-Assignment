@@ -1,15 +1,5 @@
-# Sensitive credentials
 .env
-*.env
-
-# Python cache & virtual environments
+output/
 __pycache__/
 *.pyc
 *.pyo
-venv/
-.venv/
-
-# Outputs
-energy_assistant/output/
-output/
-*.xlsx
