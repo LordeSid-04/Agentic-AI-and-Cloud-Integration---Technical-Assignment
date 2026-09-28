@@ -1,6 +1,6 @@
 # Agentic AI Energy Assistant
 
-An AI-powered command-line assistant that answers natural-language questions about energy consumption and generates Excel invoices - built for the ERI@NTU Agentic AI technical assignment.
+An AI-powered command-line assistant that answers natural-language questions about energy consumption and generates Excel invoices - built for the ERI@NTU Agentic AI Development & Cloud Integration technical assignment.
 
 ---
 
