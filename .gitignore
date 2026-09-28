@@ -1,5 +1,6 @@
 .env
-output/
+output/*
+!output/sample_invoice_2026-08-01_to_2026-08-31.xlsx
 __pycache__/
 *.pyc
 *.pyo

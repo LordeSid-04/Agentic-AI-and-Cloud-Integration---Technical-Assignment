@@ -1,5 +1,6 @@
 import pandas as pd
 from datetime import timedelta
+from decimal import Decimal, ROUND_HALF_UP
 from openpyxl.styles import Font
 from config import TARIFF_SGD_PER_KWH, OUTPUT_DIR
 
@@ -80,7 +81,10 @@ def generate_invoice(df: pd.DataFrame, start_date: str, end_date: str) -> dict:
         return consumption
 
     total_kwh = consumption["total_kwh"]
-    total_cost = round(total_kwh * TARIFF_SGD_PER_KWH, 2)
+    total_cost = float(
+        (Decimal(str(total_kwh)) * Decimal(str(TARIFF_SGD_PER_KWH)))
+        .quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    )
 
     # Bill only what the data covers; say so inside the file itself
     partial = "warning" in consumption
@@ -105,7 +109,6 @@ def generate_invoice(df: pd.DataFrame, start_date: str, end_date: str) -> dict:
     )
     daily.columns = ["Date", "Consumption (kWh)"]
     daily["Date"] = daily["Date"].astype(str)  # clean YYYY-MM-DD strings in Excel
-    daily["Cost (SGD)"] = (daily["Consumption (kWh)"] * TARIFF_SGD_PER_KWH).round(2)
     daily["Consumption (kWh)"] = daily["Consumption (kWh)"].round(2)
 
     # Write Excel
@@ -140,10 +143,20 @@ def generate_invoice(df: pd.DataFrame, start_date: str, end_date: str) -> dict:
         for cell in ws[breakdown_start_row + 1]:
             cell.font = bold
 
+        # Format numeric cells in summary section to 2 decimal places (0.00)
+        for row in range(2, len(summary_df) + 2):
+            cell = ws.cell(row=row, column=2)
+            if isinstance(cell.value, (int, float)):
+                cell.number_format = "0.00"
+
+        # Format daily consumption cells to 2 decimal places (0.00, e.g. 16.60)
+        for row in range(breakdown_start_row + 2, breakdown_start_row + 2 + len(daily)):
+            ws.cell(row=row, column=2).number_format = "0.00"
+
         # Auto-fit column widths
         for col in ws.columns:
             max_length = max(len(str(cell.value or "")) for cell in col) + 2
-            ws.column_dimensions[col[0].column_letter].width = max_length
+            ws.column_dimensions[col[0].column_letter].width = max(max_length, 12)
 
     # Result
     result = {

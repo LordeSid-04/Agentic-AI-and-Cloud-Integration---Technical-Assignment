@@ -17,6 +17,9 @@ cp .env.example .env
 
 # 3. Run
 python main.py
+
+# 4. (Optional) Run tests (10 LLM-free unit tests)
+python -m unittest tests/test_tools.py
 ```
 
 You can get a free Groq API key at [console.groq.com](https://console.groq.com).
@@ -34,7 +37,7 @@ This keeps a clean separation of concerns: the LLM handles language understandin
 ### Design Trade-offs
 
 - **No heavy frameworks.** The agent loop is deliberately built as a plain, native function-calling loop with no LangChain, LangGraph, or similar orchestration frameworks, matching the brief's instruction to "keep the solution simple".
-- **Provider-agnostic.** The codebase uses the OpenAI Python SDK pointed at any OpenAI-compatible endpoint. Switching from Groq to Gemini (or any other provider) is a one-line change in `.env`.
+- **Provider-agnostic.** The codebase uses the OpenAI Python SDK pointed at any OpenAI-compatible endpoint. Switching from Groq to Gemini (or any other provider) simply requires updating three variables in `.env` (`LLM_API_KEY`, `LLM_BASE_URL`, and `LLM_MODEL`).
 - **LLM resolves dates; Python validates every range.** The model extracts dates from natural language. The Python tools then independently validate, filter, and calculate - the LLM never performs arithmetic.
 
 ### LLM Choice
@@ -48,7 +51,7 @@ The LLM has access to two tools:
 | Tool | Purpose |
 |---|---|
 | `get_total_consumption` | Sums hourly kWh readings for a date range and returns the total. |
-| `generate_invoice` | Computes the same total, multiplies by the SGD 0.25/kWh tariff, and writes a formatted `.xlsx` file with a summary and daily breakdown. |
+| `generate_invoice` | Computes the total consumption, applies the SGD 0.25/kWh tariff, and writes a formatted `.xlsx` file with a summary and daily breakdown. |
 
 Both tools share the same date-validation and filtering logic via a `_parse_range()` helper. The date range uses an interval-start convention: `timestamp >= start_date` AND `timestamp < end_date + 1 day`, so that the full 24 hours of the end date are always included.
 
@@ -70,10 +73,10 @@ The assistant maintains conversation history, so users can ask follow-up questio
 
 The generated `.xlsx` file contains:
 - A **summary section** with billing period, total kWh, tariff, and total payable.
-- A **daily breakdown table** showing each day's consumption and cost.
+- A **daily breakdown table** showing each day's energy consumption (kWh), which sums exactly to the total consumption.
 - A **Note** row (when the requested range is partially outside the dataset).
-
-Headers are bolded and columns are auto-sized for readability.
+- Financial totals calculated using `Decimal` with half-up rounding (`ROUND_HALF_UP`) to match standard financial accounting.
+- Values formatted to two decimal places (`0.00`), headers bolded, and columns auto-sized for readability.
 
 ---
 
@@ -91,7 +94,10 @@ Headers are bolded and columns are auto-sized for readability.
 ├── README.md
 ├── data/
 │   └── simulated_energy_data_aug.csv
-└── output/            # Generated invoices are saved here (gitignored)
+├── output/
+│   └── sample_invoice_2026-08-01_to_2026-08-31.xlsx
+└── tests/
+    └── test_tools.py  # 10 LLM-free unit tests (python -m unittest tests/test_tools.py)
 ```
 
 ---

@@ -10,7 +10,6 @@ from tools import get_total_consumption, generate_invoice
 def _build_system_prompt(min_date, max_date):
     coverage_start = min_date.strftime("%d %B %Y")
     coverage_end = max_date.strftime("%d %B %Y")
-    coverage_month = min_date.strftime("%B %Y")
     default_year = min_date.year
     date_example = f"{min_date.strftime('%d %b %Y')} to {max_date.strftime('%d %b %Y')}"
 
@@ -38,9 +37,7 @@ def _build_system_prompt(min_date, max_date):
         "- Respond in plain text for a command-line terminal. Do not use Markdown: "
         "no asterisks, hash headings, tables, or Markdown links. Use short labels "
         "and line breaks instead.\n"
-        "- After successfully reporting consumption, end with exactly: "
-        f"Would you like me to generate a detailed invoice for {coverage_month}, "
-        f"or show consumption details for {coverage_month}?\n"
+        "- After successfully reporting consumption, offer once to generate an invoice for the same period.\n"
         "- After successfully generating an invoice, state the billing period, "
         "total consumption, tariff, total payable, and the clean output filename. "
         "Do not recommend further analysis.\n"
@@ -190,12 +187,15 @@ class EnergyAgent:
             # Check if the model wants to call tool(s)
             if not message.tool_calls:
                 # No tool call -> final text answer
-                self.history.append({"role": "assistant", "content": message.content})
-                return self._format_terminal_response(message.content)
+                self.history.append({"role": "assistant", "content": message.content or ""})
+                return self._format_terminal_response(message.content or "")
 
             # Process each tool call
             # Add the assistant message (with tool_calls) to history
-            self.history.append(message.model_dump(exclude_none=True))
+            assistant_msg = message.model_dump(exclude_none=True)
+            if not assistant_msg.get("content"):
+                assistant_msg["content"] = message.content or ""
+            self.history.append(assistant_msg)
 
             for tool_call in message.tool_calls:
                 fn_name = tool_call.function.name
